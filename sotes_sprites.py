@@ -1,8 +1,11 @@
 #!/usr/bin/python
 
-import Image
-import os, sys
+import os
+import sys
 from struct import unpack
+
+from PIL import Image
+
 
 def guess_image_dimension(
 	dimension_candidates,
@@ -68,6 +71,7 @@ def extract_image(f, target_path):
 			pixels[x, height - 1 - y] = (b, g, r)
 	img.save(target_path)
 
+
 paths = sys.argv[1:]
 if len(paths) == 0:
 	print 'Usage: ' + sys.argv[0] + ' PATHS'
@@ -79,7 +83,7 @@ for path in paths:
 	if os.path.exists(target_path):
 		print 'Target file already exists'
 	else:
-		with open(path) as f:
+		with open(path, 'rb') as f:
 			try:
 				extract_image(f, target_path)
 				print 'Image saved'
