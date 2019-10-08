@@ -60,34 +60,49 @@ def extract_image(f, target_path):
 		for x in range(width):
 			index = (y * width + x) * channels
 			if use_palette:
-				i = ord(pixel_data[index])
+				i = pixel_data[index]
 				r = palette[i][0]
 				g = palette[i][1]
 				b = palette[i][2]
 			else:
-				r = ord(pixel_data[index])
-				g = ord(pixel_data[index + 1])
-				b = ord(pixel_data[index + 2])
+				r = pixel_data[index]
+				g = pixel_data[index + 1]
+				b = pixel_data[index + 2]
 			pixels[x, height - 1 - y] = (b, g, r)
 	img.save(target_path)
 
 
 paths = sys.argv[1:]
 if len(paths) == 0:
-	print 'Usage: ' + sys.argv[0] + ' PATHS'
+	print('Usage: ' + sys.argv[0] + ' PATHS')
 
+# Process paths.
 for path in paths:
-	target_path = path + '.png'
-	print target_path
+	# Normalize path first for easier handling.
+	path = os.path.normpath(path)
+	# Check if path exists.
+	if os.path.exists(path):
+		# Path exists. Check if path is a directory or a file.
+		if os.path.isfile(path):
+			# Path is a file. Process file.
+			target_path = path + ".png"
+			print(target_path)
 
-	if os.path.exists(target_path):
-		print 'Target file already exists'
+			if os.path.exists(target_path):
+				print("Target file already exists.")
+
+			with open(path, "rb") as f:
+				try:
+					extract_image(f, target_path)
+					print("Image saved.")
+				except Exception as ex:
+					print("Error: {0}".format(ex))
+
+			print(end="\n")
+		else:
+			# Path is a directory. Add all sub-paths in the given directory to queue.
+			for sub_path in os.listdir(path):
+				paths.append(os.path.join(path, sub_path))
 	else:
-		with open(path, 'rb') as f:
-			try:
-				extract_image(f, target_path)
-				print 'Image saved'
-			except Exception as e:
-				print 'Error', e
-
-	print
+		# Path doesn't exist.
+		print("Failed to find path '{0}'.".format(path))
